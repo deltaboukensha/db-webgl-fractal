@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import quadVertexShaderSource from "../shaders/quad.vert";
 import quadFragmentShaderSource from "../shaders/quad.frag";
+import fractalFragmentShaderSource from "../shaders/fractal.frag";
 
 const useWebGl = (initFunction, updateFunction, dependencies) => {
   const ref = React.useRef();
@@ -72,6 +73,12 @@ const initGame = (canvas: HTMLCanvasElement) => {
     return v;
   };
 
+  const getUniformLocation = (program: WebGLProgram, key: string) => {
+    const v = gl.getUniformLocation(program, key);
+    if (!v) throw `could not get uniform location for program with key: ${key}`;
+    return v;
+  };
+
   const loadModelQuad = () => {
     const dataVertices = [-1, -1, +1, -1, -1, +1, +1, +1];
     const dataIndices = [0, 2, 1, 3, 2, 1];
@@ -108,7 +115,7 @@ const initGame = (canvas: HTMLCanvasElement) => {
   const quad = {
     ...loadModelQuad(),
     vertexShader: loadShaderVertex(quadVertexShaderSource()),
-    fragmentShader: loadShaderFragment(quadFragmentShaderSource()),
+    fragmentShader: loadShaderFragment(fractalFragmentShaderSource()),
   }
 
   const shaderProgram = loadShaderProgram(
@@ -121,12 +128,22 @@ const initGame = (canvas: HTMLCanvasElement) => {
     "vertex"
   );
 
+  const uniformElapsedTime = getUniformLocation(
+    shaderProgram,
+    "elapsedTime"
+  );
+
+  const startTime = Date.now();
+
   const updateAnimation = () => {
 
   }
 
   const renderFrame = () => {
+    const elapsedTime = Date.now() - startTime;
     gl.useProgram(shaderProgram);
+
+    gl.uniform1ui(uniformElapsedTime, elapsedTime);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, quad.bufferVertices);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, quad.bufferIndices);

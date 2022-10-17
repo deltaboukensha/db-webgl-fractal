@@ -1,4 +1,4 @@
-export default () => `#version 300 es
+const source = () => `#version 300 es
 in vec2 vertex;
 out vec2 st;
 
@@ -7,3 +7,5 @@ void main() {
   st = vertex;
 }
 `;
+
+export default source;
