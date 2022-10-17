@@ -79,33 +79,40 @@ const initGame = (canvas: HTMLCanvasElement) => {
     return v;
   };
 
-  const loadModelQuad = () => {
-    const dataVertices = [-1, -1, +1, -1, -1, +1, +1, +1];
-    const dataIndices = [0, 2, 1, 3, 2, 1];
+  const loadBufferVertices = (dataVertices: number[]) => {
+    const buffer = gl.createBuffer();
+    if(!buffer) throw "could not create glBufferVertices";
 
-    const bufferVertices = gl.createBuffer();
-    if(!bufferVertices) throw "could not create glBufferVertices";
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, bufferVertices);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(
       gl.ARRAY_BUFFER,
       new Float32Array(dataVertices),
       gl.STATIC_DRAW
     );
 
-    const bufferIndices = gl.createBuffer();
-    if(!bufferIndices) throw "could not create glBufferIndices";
+    return buffer;
+  }
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufferIndices);
+  const loadBufferIndices = (dataIndices: number[]) => {
+    const buffer = gl.createBuffer();
+    if(!buffer) throw "could not create glBufferIndices";
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer);
     gl.bufferData(
       gl.ELEMENT_ARRAY_BUFFER,
       new Uint16Array(dataIndices),
       gl.STATIC_DRAW
     );
 
+    return buffer;
+  }
+
+  const loadModelQuad = () => {
+    const dataVertices = [-1, -1, +1, -1, -1, +1, +1, +1];
+    const dataIndices = [0, 2, 1, 3, 2, 1];
     const model = {
-      bufferIndices,
-      bufferVertices,
+      bufferIndices: loadBufferIndices(dataIndices),
+      bufferVertices: loadBufferVertices(dataVertices),
       dataIndices,
       dataVertices,
     };
