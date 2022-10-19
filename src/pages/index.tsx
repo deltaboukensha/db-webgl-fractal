@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Grid } from "@mui/material";
 import quadVertexShaderSource from "../shaders/quad.vert";
 import quadFragmentShaderSource from "../shaders/quad.frag";
 import fractalFragmentShaderSource from "../shaders/fractal.frag";
@@ -180,7 +181,11 @@ const IndexPage = () => {
   return (
     <>
       <title>WebGL - Fractal</title>
-      <canvas ref={ref} width={canvasWidth} height={canvasHeight}></canvas>
+      <Grid container alignItems="center" justifyContent="center">
+        <Grid item>
+          <canvas ref={ref} width={canvasWidth} height={canvasHeight}></canvas>
+        </Grid>
+      </Grid>
     </>
   );
 };
