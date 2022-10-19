@@ -4,7 +4,7 @@ in vec2 st;
 out vec4 fragment;
 uniform uint elapsedTime;
 
-#define M_PI 3.1415926535897932384626433832795
+#define MATH_PI 3.1415926535897932384626433832795
 float focalLength = 1.0;
 
 struct Ray {
@@ -15,6 +15,12 @@ struct Ray {
 struct Plane {
   vec3 originPoint;
   vec3 normalVector;
+};
+
+struct Circle {
+  vec3 originPoint;
+  vec3 normalVector;
+  float radius;
 };
 
 struct Intersection {
@@ -52,6 +58,7 @@ Intersection findIntersection(Ray ray, Plane plane) {
   if(isAlmostPerpendicular(plane.normalVector, ray.directionVector)){
     intersection.hit = false;
     // TODO check if there are infinite hits is the rayOrigin on the plane?
+    // TODO recode this conditional if and remove it to improve performance?
     return intersection;
   }
 
@@ -61,12 +68,18 @@ Intersection findIntersection(Ray ray, Plane plane) {
   return intersection;
 }
 
+Intersection findIntersection(Ray ray, Circle circle) {
+  Intersection intersection = findIntersection(ray, Plane(circle.originPoint, circle.normalVector));
+  intersection.hit = intersection.hit && length(intersection.point - circle.originPoint) < circle.radius;
+  return intersection;
+}
+
 void main() {
-  vec3 eye = vec3(0, 0, 0);
+  vec3 eye = vec3(0, 0, sin(float(elapsedTime)*0.0001f * MATH_PI));
   Ray ray = Ray(eye, vec3(st.s, st.t, focalLength) - eye);
-  Plane plane = Plane(vec3(0, 0, 10), vec3(2, 5, 1));
-  Intersection intersection = findIntersection(ray, plane);
-  fragment = vec4(intersection.hit, sin(float(elapsedTime) * 0.001f), 0, 1);
+  Circle circle = Circle(vec3(0, 0, 10), vec3(0, 0, 1), 10.0f);
+  Intersection intersection = findIntersection(ray, circle);
+  fragment = vec4(intersection.hit, 0, 0, 1);
 }
 `;
 
