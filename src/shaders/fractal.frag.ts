@@ -5,6 +5,8 @@ out vec4 fragment;
 uniform uint elapsedTime;
 
 #define MATH_PI 3.1415926535897932384626433832795
+#define COLOR_BLACK vec4(0, 0, 0, 1)
+#define COLOR_GREEN vec4(0, 1, 0, 1)
 float focalLength = 1.0;
 
 struct Ray {
@@ -29,6 +31,21 @@ struct Intersection {
   //bool infinite
   //bool zero
   //bool reverse or what is a better name?
+};
+
+struct World {
+  Circle circle;
+};
+
+struct Job {
+  Ray eyeRay;
+  World world;
+};
+
+struct JobResult {
+  bool done;
+  Job job;
+  vec4 color;
 };
 
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-plane-and-ray-disk-intersection#:~:text=Ray%2DPlane%20Intersection&text=Note%20that%20the%20plane%20and,case%20there%20is%20no%20intersection.
@@ -70,16 +87,42 @@ Intersection findIntersection(Ray ray, Plane plane) {
 
 Intersection findIntersection(Ray ray, Circle circle) {
   Intersection intersection = findIntersection(ray, Plane(circle.originPoint, circle.normalVector));
-  intersection.hit = intersection.hit && length(intersection.point - circle.originPoint) < circle.radius;
+  intersection.hit = intersection.hit && length(intersection.point - circle.originPoint) <= circle.radius;
   return intersection;
 }
 
+vec4 findColor(Ray eyeRay, Intersection intersection, Circle circle) {
+  return vec4(1, 0, 0, 1);
+}
+
+JobResult runJob(Job job){
+  Intersection intersection = findIntersection(job.eyeRay, job.world.circle);
+  
+  if(intersection.hit) {
+    vec4 color = findColor(job.eyeRay, intersection, job.world.circle);
+    return JobResult(true, job, color);
+  }
+  
+  Job newJob = Job(Ray(job.eyeRay.originPoint, job.eyeRay.directionVector + vec3(0,1,0)), job.world);
+  return JobResult(false, newJob, COLOR_BLACK);
+}
+
 void main() {
-  vec3 eye = vec3(0, 0, sin(float(elapsedTime)*0.0001f * MATH_PI));
-  Ray ray = Ray(eye, vec3(st.s, st.t, focalLength) - eye);
+  vec3 eyeOriginPoint = vec3(0, 0, sin(float(elapsedTime)*0.0001f * MATH_PI));
+  Ray eyeRay = Ray(eyeOriginPoint, vec3(st.s, st.t, focalLength) - eyeOriginPoint);
   Circle circle = Circle(vec3(0, 0, 10), vec3(0, 0, 1), 10.0f);
-  Intersection intersection = findIntersection(ray, circle);
-  fragment = vec4(intersection.hit, 0, 0, 1);
+  World world;
+  world.circle = circle;
+
+  Job job0 = Job(eyeRay, world);
+  
+  JobResult jobResult0 = runJob(job0);
+  if(jobResult0.done) { fragment = jobResult0.color; return; }
+  
+  JobResult jobResult1 = runJob(jobResult0.job);
+  if(jobResult1.done) { fragment = jobResult1.color; return; }
+
+  fragment = COLOR_BLACK;
 }
 `;
 
