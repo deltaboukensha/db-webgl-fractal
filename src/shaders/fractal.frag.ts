@@ -42,7 +42,7 @@ struct Job {
   World world;
 };
 
-struct JobResult {
+struct Result {
   bool done;
   Job job;
   vec4 color;
@@ -95,16 +95,16 @@ vec4 findColor(Ray eyeRay, Intersection intersection, Circle circle) {
   return vec4(1, 0, 0, 1);
 }
 
-JobResult runJob(Job job){
+Result runJob(Job job){
   Intersection intersection = findIntersection(job.eyeRay, job.world.circle);
   
   if(intersection.hit) {
     vec4 color = findColor(job.eyeRay, intersection, job.world.circle);
-    return JobResult(true, job, color);
+    return Result(true, job, color);
   }
   
   Job newJob = Job(Ray(job.eyeRay.originPoint, job.eyeRay.directionVector + vec3(0,1,0)), job.world);
-  return JobResult(false, newJob, COLOR_BLACK);
+  return Result(false, newJob, COLOR_BLACK);
 }
 
 void main() {
@@ -116,11 +116,17 @@ void main() {
 
   Job job0 = Job(eyeRay, world);
   
-  JobResult jobResult0 = runJob(job0);
-  if(jobResult0.done) { fragment = jobResult0.color; return; }
+  Result result0 = runJob(job0);
+  if(result0.done) { fragment = result0.color; return; }
   
-  JobResult jobResult1 = runJob(jobResult0.job);
-  if(jobResult1.done) { fragment = jobResult1.color; return; }
+  for(int i=0; i<8; i++) {
+    if(i == 0) {
+      Result result1 = runJob(result0.job);
+      if(result1.done) { fragment = result1.color; return; }
+
+      break;
+    }
+  }
 
   fragment = COLOR_BLACK;
 }
