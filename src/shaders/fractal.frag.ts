@@ -113,18 +113,15 @@ void main() {
   Circle circle = Circle(vec3(0, 0, 10), vec3(0, 0, 1), 10.0f);
   World world;
   world.circle = circle;
+  Job job = Job(eyeRay, world);
+  Result result = Result(false, job, COLOR_BLACK);
 
-  Job job0 = Job(eyeRay, world);
-  
-  Result result0 = runJob(job0);
-  if(result0.done) { fragment = result0.color; return; }
-  
   for(int i=0; i<8; i++) {
-    if(i == 0) {
-      Result result1 = runJob(result0.job);
-      if(result1.done) { fragment = result1.color; return; }
+    result = runJob(result.job);
 
-      break;
+    if(result.done) {
+      fragment = result.color;
+      return;
     }
   }
 
