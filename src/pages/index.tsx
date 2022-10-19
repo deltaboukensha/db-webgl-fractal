@@ -19,11 +19,11 @@ const useWebGl = (initFunction, updateFunction, dependencies) => {
 
 const initGame = (canvas: HTMLCanvasElement) => {
   const gl = canvas.getContext("webgl2");
-  if(!gl) throw "gl is not supported";
+  if (!gl) throw "gl is not supported";
 
   const loadShaderVertex = (sourceCode: string) => {
     const shader = gl.createShader(gl.VERTEX_SHADER);
-    if(!shader) throw "could not create shader";
+    if (!shader) throw "could not create shader";
 
     gl.shaderSource(shader, sourceCode);
     gl.compileShader(shader);
@@ -37,7 +37,7 @@ const initGame = (canvas: HTMLCanvasElement) => {
 
   const loadShaderFragment = (sourceCode: string) => {
     const shader = gl.createShader(gl.FRAGMENT_SHADER);
-    if(!shader) throw "could not create shader";
+    if (!shader) throw "could not create shader";
 
     gl.shaderSource(shader, sourceCode);
     gl.compileShader(shader);
@@ -54,7 +54,7 @@ const initGame = (canvas: HTMLCanvasElement) => {
     fragmentShader: WebGLShader
   ) => {
     const shaderProgram = gl.createProgram();
-    if(!shaderProgram) throw "could not create program";
+    if (!shaderProgram) throw "could not create program";
 
     gl.attachShader(shaderProgram, vertexShader);
     gl.attachShader(shaderProgram, fragmentShader);
@@ -81,7 +81,7 @@ const initGame = (canvas: HTMLCanvasElement) => {
 
   const loadBufferVertices = (dataVertices: number[]) => {
     const buffer = gl.createBuffer();
-    if(!buffer) throw "could not create glBufferVertices";
+    if (!buffer) throw "could not create glBufferVertices";
 
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(
@@ -91,11 +91,11 @@ const initGame = (canvas: HTMLCanvasElement) => {
     );
 
     return buffer;
-  }
+  };
 
   const loadBufferIndices = (dataIndices: number[]) => {
     const buffer = gl.createBuffer();
-    if(!buffer) throw "could not create glBufferIndices";
+    if (!buffer) throw "could not create glBufferIndices";
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer);
     gl.bufferData(
@@ -105,7 +105,7 @@ const initGame = (canvas: HTMLCanvasElement) => {
     );
 
     return buffer;
-  }
+  };
 
   const loadModelQuad = () => {
     const dataVertices = [-1, -1, +1, -1, -1, +1, +1, +1];
@@ -123,28 +123,20 @@ const initGame = (canvas: HTMLCanvasElement) => {
     ...loadModelQuad(),
     vertexShader: loadShaderVertex(quadVertexShaderSource()),
     fragmentShader: loadShaderFragment(fractalFragmentShaderSource()),
-  }
+  };
 
   const shaderProgram = loadShaderProgram(
     quad.vertexShader,
-    quad.fragmentShader,
+    quad.fragmentShader
   );
 
-  const vertexAttribute = getProgramAttribute(
-    shaderProgram,
-    "vertex"
-  );
+  const vertexAttribute = getProgramAttribute(shaderProgram, "vertex");
 
-  const uniformElapsedTime = getUniformLocation(
-    shaderProgram,
-    "elapsedTime"
-  );
+  const uniformElapsedTime = getUniformLocation(shaderProgram, "elapsedTime");
 
   const startTime = Date.now();
 
-  const updateAnimation = () => {
-
-  }
+  const updateAnimation = () => {};
 
   const renderFrame = () => {
     const elapsedTime = Date.now() - startTime;
@@ -164,7 +156,7 @@ const initGame = (canvas: HTMLCanvasElement) => {
       gl.UNSIGNED_SHORT,
       0
     );
-  }
+  };
 
   const renderLoop = () => {
     updateAnimation();
@@ -173,7 +165,7 @@ const initGame = (canvas: HTMLCanvasElement) => {
   };
 
   renderLoop();
-}
+};
 
 const IndexPage = () => {
   const ref = useWebGl(
@@ -185,10 +177,12 @@ const IndexPage = () => {
   );
   const canvasWidth = 512;
   const canvasHeight = 512;
-  return <>
-    <title>WebGL - Fractal</title>
-    <canvas ref={ref} width={canvasWidth} height={canvasHeight}></canvas>
-  </>
+  return (
+    <>
+      <title>WebGL - Fractal</title>
+      <canvas ref={ref} width={canvasWidth} height={canvasHeight}></canvas>
+    </>
+  );
 };
 
 export default IndexPage;

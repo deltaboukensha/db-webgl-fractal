@@ -3,10 +3,12 @@ precision mediump float;
 in vec2 st;
 out vec4 fragment;
 uniform uint elapsedTime;
+#define M_PI 3.1415926535897932384626433832795
 
 void main() {
-  float i_float = float(elapsedTime);
-  fragment = vec4(mod(i_float / 10.0, 1.0), st.t, st.s+st.t, 1);
+  float et = mod(float(elapsedTime) * 0.001f, 1.0);
+  float d = abs(abs(st.s) - et);
+  fragment = vec4(d, 0, 0, 1);
 }
 `;
 
