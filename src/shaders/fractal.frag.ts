@@ -103,7 +103,7 @@ Result runJob(Job job){
     return Result(true, job, color);
   }
   
-  Job newJob = Job(Ray(job.eyeRay.originPoint, job.eyeRay.directionVector + vec3(0,1,0)), job.world);
+  Job newJob = Job(Ray(job.eyeRay.originPoint + vec3(100,0,0), job.eyeRay.directionVector + vec3(0,0.1,0)), job.world);
   return Result(false, newJob, COLOR_BLACK);
 }
 
@@ -116,7 +116,7 @@ void main() {
   Job job = Job(eyeRay, world);
   Result result = Result(false, job, COLOR_BLACK);
 
-  for(int i=0; i<8; i++) {
+  for(int i=0; i<16; i++) {
     result = runJob(result.job);
 
     if(result.done) {
