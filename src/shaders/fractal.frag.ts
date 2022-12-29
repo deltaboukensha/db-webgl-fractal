@@ -6,8 +6,8 @@ uniform uint elapsedTime;
 uniform vec3 eyeOriginPoint;
 
 #define MATH_PI 3.1415926535897932384626433832795
-#define COLOR_BLACK vec4(0, 0, 0, 1)
-#define COLOR_GREEN vec4(0, 1, 0, 1)
+#define COLOR_BLACK vec3(0, 0, 0)
+#define COLOR_GREEN vec3(0, 1, 0)
 float focalLength = 1.0;
 
 struct Ray {
@@ -57,7 +57,7 @@ struct Job {
 struct Result {
   bool done;
   Job job;
-  vec4 color;
+  vec3 color;
 };
 
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-plane-and-ray-disk-intersection#:~:text=Ray%2DPlane%20Intersection&text=Note%20that%20the%20plane%20and,case%20there%20is%20no%20intersection.
@@ -130,7 +130,7 @@ vec4 findColor(Ray ray, Intersection intersection, Circle circle) {
 }
 
 // Phong reflection model
-vec4 findColor(Ray ray, Intersection intersection, Sphere sphere, Sun sun) {
+vec3 findColor(Ray ray, Intersection intersection, Sphere sphere, Sun sun) {
   vec3 N = normalize(intersection.point - sphere.originPoint);
   vec3 L = normalize(intersection.point - sun.originPoint);
   vec3 V = normalize(intersection.point - ray.originPoint);
@@ -141,7 +141,7 @@ vec4 findColor(Ray ray, Intersection intersection, Sphere sphere, Sun sun) {
 
   // Lambertian shading
   vec3 lambertian = 1.0f * vec3(1, 0, 0) * max(0.0f, dot(N, L));
-  return vec4(lambertian.x, lambertian.y, lambertian.z, 1);
+  return lambertian;
 }
 
 Result runJob(Job job){
@@ -156,14 +156,15 @@ Result runJob(Job job){
     Sphere sphere = job.world.sphere[i];
     Intersection intersection = findIntersection(job.eyeRay, sphere);
     if (intersection.hit) {
-      vec4 color = findColor(job.eyeRay, intersection, sphere, job.world.sun);
-      return Result(true, job, color);
+      vec3 color = findColor(job.eyeRay, intersection, sphere, job.world.sun);
+
+      Ray newRay = Ray(intersection.point, job.eyeRay.directionVector);
+      Job newJob = Job(newRay, job.world);
+      return Result(true, newJob, color);
     }
   }
   
-  Ray newRay = Ray(job.eyeRay.originPoint, job.eyeRay.directionVector);
-  Job newJob = Job(newRay, job.world);
-  return Result(false, newJob, COLOR_BLACK);
+  return Result(true, job, COLOR_BLACK);
 }
 
 void main() {
@@ -181,12 +182,12 @@ void main() {
     result = runJob(result.job);
 
     if(result.done) {
-      fragment = result.color;
+      fragment = vec4(result.color, 1.0f);
       return;
     }
   }
 
-  fragment = COLOR_BLACK;
+  fragment = vec4(0, 0, 0, 1.0f);
 }
 `;
 
