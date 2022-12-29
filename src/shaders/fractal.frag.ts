@@ -52,6 +52,7 @@ struct World {
 struct Job {
   Ray eyeRay;
   World world;
+  int skipIndex;
 };
 
 struct Result {
@@ -116,9 +117,11 @@ Intersection findIntersection(Ray ray, Sphere sphere) {
   // if(delta == 0) // exactly one solution
   // if(delta > 0) // exactly two solutions
 
+  // simplified version only supports the case with exactly two solutions
+
   if(delta > 0.0f) {
     float d1 = -dot(u, o - c) - sqrt(delta);
-    float d2 = -dot(u, o - c) + sqrt(delta);
+    // float d2 = -dot(u, o - c) + sqrt(delta);
     return Intersection(true, o + d1 * u);
   }
 
@@ -153,14 +156,18 @@ Result runJob(Job job){
   // }
 
   for(int i=0; i<job.world.sphere.length(); i++){
+    if(job.skipIndex == i) continue;
+
     Sphere sphere = job.world.sphere[i];
     Intersection intersection = findIntersection(job.eyeRay, sphere);
     if (intersection.hit) {
       vec3 color = findColor(job.eyeRay, intersection, sphere, job.world.sun);
 
-      Ray newRay = Ray(intersection.point, job.eyeRay.directionVector);
-      Job newJob = Job(newRay, job.world);
-      return Result(true, newJob, color);
+      vec3 normalVector = normalize(intersection.point - sphere.originPoint);
+      vec3 refractionVector = refract(job.eyeRay.directionVector, normalVector, 1.3f);
+      Ray newRay = Ray(intersection.point, refractionVector);
+      Job newJob = Job(newRay, job.world, i);
+      return Result(false, newJob, color);
     }
   }
   
@@ -175,19 +182,18 @@ void main() {
   world.sphere[1] = Sphere(vec3(2, 0, 10), 1.0f);
   world.sphere[2] = Sphere(vec3(4, 0, 10), 1.0f);
   world.sun = Sun(vec3(100, -100, 100));
-  Job job = Job(eyeRay, world);
+  Job job = Job(eyeRay, world, -1);
   Result result = Result(false, job, COLOR_BLACK);
+  fragment = vec4(0, 0, 0, 1.0f);
 
-  for(int i=0; i<1; i++) {
+  for(int i=0; i<2; i++) {
     result = runJob(result.job);
+    fragment = mix(fragment, vec4(result.color, 1.0f), 0.5f);
 
     if(result.done) {
-      fragment = vec4(result.color, 1.0f);
       return;
     }
   }
-
-  fragment = vec4(0, 0, 0, 1.0f);
 }
 `;
 
