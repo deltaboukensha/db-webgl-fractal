@@ -45,7 +45,7 @@ struct Intersection {
 
 struct World {
   Circle circle;
-  Sphere sphere;
+  Sphere sphere[3];
   Sun sun;
 };
 
@@ -152,10 +152,13 @@ Result runJob(Job job){
   //   return Result(true, job, color);
   // }
 
-  Intersection intersection = findIntersection(job.eyeRay, job.world.sphere);
-  if (intersection.hit) {
-    vec4 color = findColor(job.eyeRay, intersection, job.world.sphere, job.world.sun);
-    return Result(true, job, color);
+  for(int i=0; i<job.world.sphere.length(); i++){
+    Sphere sphere = job.world.sphere[i];
+    Intersection intersection = findIntersection(job.eyeRay, sphere);
+    if (intersection.hit) {
+      vec4 color = findColor(job.eyeRay, intersection, sphere, job.world.sun);
+      return Result(true, job, color);
+    }
   }
   
   Ray newRay = Ray(job.eyeRay.originPoint, job.eyeRay.directionVector);
@@ -167,7 +170,9 @@ void main() {
   Ray eyeRay = Ray(eyeOriginPoint, vec3(st.s, st.t, focalLength));
   World world;
   world.circle = Circle(vec3(0, 0, 10), vec3(0, 0, 1), 10.0f);
-  world.sphere = Sphere(vec3(0, 0, 10), 1.0f);
+  world.sphere[0] = Sphere(vec3(0, 0, 10), 1.0f);
+  world.sphere[1] = Sphere(vec3(2, 0, 10), 1.0f);
+  world.sphere[2] = Sphere(vec3(4, 0, 10), 1.0f);
   world.sun = Sun(vec3(100, -100, 100));
   Job job = Job(eyeRay, world);
   Result result = Result(false, job, COLOR_BLACK);

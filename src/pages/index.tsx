@@ -161,32 +161,32 @@ const initGame = (canvas: HTMLCanvasElement) => {
 
     if(keyDown["KeyW"]){
       const [x, y, z] = eyeOriginPoint;
-      eyeOriginPoint = [x, y, z + 0.001 * deltaTime];
+      eyeOriginPoint = [x, y, z + 0.002 * deltaTime];
     }
 
     if(keyDown["KeyS"]){
       const [x, y, z] = eyeOriginPoint;
-      eyeOriginPoint = [x, y, z - 0.001 * deltaTime];
+      eyeOriginPoint = [x, y, z - 0.002 * deltaTime];
     }
 
     if(keyDown["KeyA"]){
       const [x, y, z] = eyeOriginPoint;
-      eyeOriginPoint = [x - 0.001 * deltaTime, y, z];
+      eyeOriginPoint = [x - 0.002 * deltaTime, y, z];
     }
 
     if(keyDown["KeyD"]){
       const [x, y, z] = eyeOriginPoint;
-      eyeOriginPoint = [x + 0.001 * deltaTime, y, z];
+      eyeOriginPoint = [x + 0.002 * deltaTime, y, z];
     }
 
     if(keyDown["KeyQ"]){
       const [x, y, z] = eyeOriginPoint;
-      eyeOriginPoint = [x, y - 0.001 * deltaTime, z];
+      eyeOriginPoint = [x, y - 0.002 * deltaTime, z];
     }
 
     if(keyDown["KeyE"]){
       const [x, y, z] = eyeOriginPoint;
-      eyeOriginPoint = [x, y + 0.001 * deltaTime, z];
+      eyeOriginPoint = [x, y + 0.002 * deltaTime, z];
     }
 
     gl.uniform3fv(uniformEyeOriginPoint, new Float32Array(eyeOriginPoint));
