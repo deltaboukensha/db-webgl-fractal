@@ -133,17 +133,15 @@ const initGame = (canvas: HTMLCanvasElement) => {
 
   const vertexAttribute = getProgramAttribute(shaderProgram, "vertex");
 
-  const uniformElapsedTime = getUniformLocation(shaderProgram, "elapsedTime");
+  // const uniformElapsedTime = getUniformLocation(shaderProgram, "elapsedTime");
 
   const startTime = Date.now();
-
-  const updateAnimation = () => {};
 
   const renderFrame = () => {
     const elapsedTime = Date.now() - startTime;
     gl.useProgram(shaderProgram);
 
-    gl.uniform1ui(uniformElapsedTime, elapsedTime);
+    // gl.uniform1ui(uniformElapsedTime, elapsedTime);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, quad.bufferVertices);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, quad.bufferIndices);
@@ -160,7 +158,6 @@ const initGame = (canvas: HTMLCanvasElement) => {
   };
 
   const renderLoop = () => {
-    updateAnimation();
     renderFrame();
     window.requestAnimationFrame(renderLoop);
   };

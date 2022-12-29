@@ -25,6 +25,15 @@ struct Circle {
   float radius;
 };
 
+struct Sphere {
+  vec3 originPoint;
+  float radius;
+};
+
+struct Sun {
+  vec3 originPoint;
+};
+
 struct Intersection {
   bool hit;
   vec3 point;
@@ -35,6 +44,8 @@ struct Intersection {
 
 struct World {
   Circle circle;
+  Sphere sphere;
+  Sun sun;
 };
 
 struct Job {
@@ -91,32 +102,77 @@ Intersection findIntersection(Ray ray, Circle circle) {
   return intersection;
 }
 
-vec4 findColor(Ray eyeRay, Intersection intersection, Circle circle) {
+// https://en.wikipedia.org/wiki/Line%E2%80%93sphere_intersection
+Intersection findIntersection(Ray ray, Sphere sphere) {
+  vec3 o = ray.originPoint;
+  vec3 u = normalize(ray.directionVector); // same as û
+  vec3 c = sphere.originPoint;
+  float r = sphere.radius;
+  
+  float delta = dot(u, o - c) * dot(u, o - c) - (length(o - c) * length(o - c) - r * r);
+  
+  // if(delta < 0) // no solutions
+  // if(delta == 0) // exactly one solution
+  // if(delta > 0) // exactly two solutions
+
+  if(delta > 0.0f) {
+    float d1 = -dot(u, o - c) - sqrt(delta);
+    float d2 = -dot(u, o - c) + sqrt(delta);
+    return Intersection(true, o + d1 * u);
+  }
+
+  return Intersection(false, vec3(0, 0, 0));
+}
+
+vec4 findColor(Ray ray, Intersection intersection, Circle circle) {
   return vec4(1, 0, 0, 1);
 }
 
+// Phong reflection model
+vec4 findColor(Ray ray, Intersection intersection, Sphere sphere, Sun sun) {
+  vec3 N = normalize(intersection.point - sphere.originPoint);
+  vec3 L = normalize(intersection.point - sun.originPoint);
+  vec3 V = normalize(intersection.point - ray.originPoint);
+  vec3 R = reflect(L, N);
+  // ambient
+  // diffuse
+  // specular
+
+  // Lambertian shading
+  vec3 lambertian = 1.0f * vec3(1, 1, 1) * max(0.0f, dot(N, L));
+  return vec4(lambertian.x, lambertian.y, lambertian.z, 1);
+}
+
 Result runJob(Job job){
-  Intersection intersection = findIntersection(job.eyeRay, job.world.circle);
+  // Intersection intersection = findIntersection(job.eyeRay, job.world.circle);
   
-  if(intersection.hit) {
-    vec4 color = findColor(job.eyeRay, intersection, job.world.circle);
+  // if(intersection.hit) {
+  //   vec4 color = findColor(job.eyeRay, intersection, job.world.circle);
+  //   return Result(true, job, color);
+  // }
+
+  Intersection intersection = findIntersection(job.eyeRay, job.world.sphere);
+  if (intersection.hit) {
+    vec4 color = findColor(job.eyeRay, intersection, job.world.sphere, job.world.sun);
     return Result(true, job, color);
   }
   
-  Job newJob = Job(Ray(job.eyeRay.originPoint + vec3(100,0,0), job.eyeRay.directionVector + vec3(0,0.1,0)), job.world);
+  Ray newRay = Ray(job.eyeRay.originPoint, job.eyeRay.directionVector);
+  Job newJob = Job(newRay, job.world);
   return Result(false, newJob, COLOR_BLACK);
 }
 
 void main() {
-  vec3 eyeOriginPoint = vec3(0, 0, sin(float(elapsedTime)*0.0001f * MATH_PI));
-  Ray eyeRay = Ray(eyeOriginPoint, vec3(st.s, st.t, focalLength) - eyeOriginPoint);
-  Circle circle = Circle(vec3(0, 0, 10), vec3(0, 0, 1), 10.0f);
+  vec3 eyeOriginPoint = vec3(0, 0, 0);
+  Ray eyeRay = Ray(eyeOriginPoint, vec3(st.s, st.t, focalLength));
   World world;
-  world.circle = circle;
+  world.circle = Circle(vec3(0, 0, 10), vec3(0, 0, 1), 10.0f);
+  world.sphere = Sphere(vec3(0, 0, 10), 1.0f);
+  world.sun = Sun(vec3(100, -100, 100));
   Job job = Job(eyeRay, world);
   Result result = Result(false, job, COLOR_BLACK);
 
-  for(int i=0; i<16; i++) {
+  for(int i=0; i<1; i++) {
     result = runJob(result.job);
 
     if(result.done) {
