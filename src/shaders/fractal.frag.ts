@@ -3,6 +3,7 @@ precision mediump float;
 in vec2 st;
 out vec4 fragment;
 uniform uint elapsedTime;
+uniform vec3 eyeOriginPoint;
 
 #define MATH_PI 3.1415926535897932384626433832795
 #define COLOR_BLACK vec4(0, 0, 0, 1)
@@ -139,7 +140,7 @@ vec4 findColor(Ray ray, Intersection intersection, Sphere sphere, Sun sun) {
   // specular
 
   // Lambertian shading
-  vec3 lambertian = 1.0f * vec3(1, 1, 1) * max(0.0f, dot(N, L));
+  vec3 lambertian = 1.0f * vec3(1, 0, 0) * max(0.0f, dot(N, L));
   return vec4(lambertian.x, lambertian.y, lambertian.z, 1);
 }
 
@@ -163,7 +164,6 @@ Result runJob(Job job){
 }
 
 void main() {
-  vec3 eyeOriginPoint = vec3(0, 0, 0);
   Ray eyeRay = Ray(eyeOriginPoint, vec3(st.s, st.t, focalLength));
   World world;
   world.circle = Circle(vec3(0, 0, 10), vec3(0, 0, 1), 10.0f);

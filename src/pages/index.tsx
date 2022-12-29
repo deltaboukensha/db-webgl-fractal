@@ -134,14 +134,62 @@ const initGame = (canvas: HTMLCanvasElement) => {
   const vertexAttribute = getProgramAttribute(shaderProgram, "vertex");
 
   // const uniformElapsedTime = getUniformLocation(shaderProgram, "elapsedTime");
+  const uniformEyeOriginPoint = getUniformLocation(shaderProgram, "eyeOriginPoint");
 
   const startTime = Date.now();
+  let lastTime = Date.now();
+  const keyDown = {};
+  let eyeOriginPoint = [0, 0, 5];
+
+  document.addEventListener("keydown", (event) => {
+    keyDown[event.code] = true;
+    console.log(event);
+    event.preventDefault();
+  });
+
+  document.addEventListener("keyup", (event) => {
+    keyDown[event.code] = false;
+    event.preventDefault();
+  });
 
   const renderFrame = () => {
     const elapsedTime = Date.now() - startTime;
-    gl.useProgram(shaderProgram);
+    const deltaTime = Date.now() - lastTime;
 
+    gl.useProgram(shaderProgram);
     // gl.uniform1ui(uniformElapsedTime, elapsedTime);
+
+    if(keyDown["KeyW"]){
+      const [x, y, z] = eyeOriginPoint;
+      eyeOriginPoint = [x, y, z + 0.001 * deltaTime];
+    }
+
+    if(keyDown["KeyS"]){
+      const [x, y, z] = eyeOriginPoint;
+      eyeOriginPoint = [x, y, z - 0.001 * deltaTime];
+    }
+
+    if(keyDown["KeyA"]){
+      const [x, y, z] = eyeOriginPoint;
+      eyeOriginPoint = [x - 0.001 * deltaTime, y, z];
+    }
+
+    if(keyDown["KeyD"]){
+      const [x, y, z] = eyeOriginPoint;
+      eyeOriginPoint = [x + 0.001 * deltaTime, y, z];
+    }
+
+    if(keyDown["KeyQ"]){
+      const [x, y, z] = eyeOriginPoint;
+      eyeOriginPoint = [x, y - 0.001 * deltaTime, z];
+    }
+
+    if(keyDown["KeyE"]){
+      const [x, y, z] = eyeOriginPoint;
+      eyeOriginPoint = [x, y + 0.001 * deltaTime, z];
+    }
+
+    gl.uniform3fv(uniformEyeOriginPoint, new Float32Array(eyeOriginPoint));
 
     gl.bindBuffer(gl.ARRAY_BUFFER, quad.bufferVertices);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, quad.bufferIndices);
@@ -155,6 +203,8 @@ const initGame = (canvas: HTMLCanvasElement) => {
       gl.UNSIGNED_SHORT,
       0
     );
+
+    lastTime = Date.now();
   };
 
   const renderLoop = () => {
