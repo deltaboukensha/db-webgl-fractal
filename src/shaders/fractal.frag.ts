@@ -175,7 +175,7 @@ Result runJob(Job job){
 }
 
 void main() {
-  Ray eyeRay = Ray(eyeOriginPoint, vec3(st.s, st.t, focalLength));
+  Ray eyeRay = Ray(eyeOriginPoint, normalize(vec3(st.s, st.t, focalLength)));
   World world;
   world.circle = Circle(vec3(0, 0, 10), vec3(0, 0, 1), 10.0f);
   world.sphere[0] = Sphere(vec3(0, 0, 10), 1.0f);
@@ -186,7 +186,7 @@ void main() {
   Result result = Result(false, job, COLOR_BLACK);
   fragment = vec4(0, 0, 0, 1.0f);
 
-  for(int i=0; i<2; i++) {
+  for(int i=0; i<3; i++) {
     result = runJob(result.job);
     fragment = mix(fragment, vec4(result.color, 1.0f), 0.5f);
 
