@@ -4,6 +4,7 @@ in vec2 st;
 out vec4 fragment;
 uniform uint elapsedTime;
 uniform vec3 eyeOriginPoint;
+uniform mat3 eyeRotationMatrix;
 
 #define MATH_PI 3.1415926535897932384626433832795
 #define COLOR_BLACK vec3(0, 0, 0)
@@ -164,7 +165,7 @@ Result runJob(Job job){
       vec3 color = findColor(job.eyeRay, intersection, sphere, job.world.sun);
 
       vec3 normalVector = normalize(intersection.point - sphere.originPoint);
-      vec3 refractionVector = refract(job.eyeRay.directionVector, normalVector, 1.3f);
+      vec3 refractionVector = refract(job.eyeRay.directionVector, normalVector, 1.1f);
       Ray newRay = Ray(intersection.point, refractionVector);
       Job newJob = Job(newRay, job.world, i);
       return Result(false, newJob, color);
@@ -175,12 +176,12 @@ Result runJob(Job job){
 }
 
 void main() {
-  Ray eyeRay = Ray(eyeOriginPoint, normalize(vec3(st.s, st.t, focalLength)));
+  Ray eyeRay = Ray(eyeOriginPoint, normalize(vec3(st.s, st.t, focalLength)) * eyeRotationMatrix);
   World world;
   world.circle = Circle(vec3(0, 0, 10), vec3(0, 0, 1), 10.0f);
   world.sphere[0] = Sphere(vec3(0, 0, 10), 1.0f);
-  world.sphere[1] = Sphere(vec3(2, 0, 10), 1.0f);
-  world.sphere[2] = Sphere(vec3(4, 0, 10), 1.0f);
+  world.sphere[1] = Sphere(vec3(+0.1, 0, 12), 1.0f);
+  world.sphere[2] = Sphere(vec3(-0.1, 0, 14), 1.0f);
   world.sun = Sun(vec3(100, -100, 100));
   Job job = Job(eyeRay, world, -1);
   Result result = Result(false, job, COLOR_BLACK);

@@ -135,11 +135,17 @@ const initGame = (canvas: HTMLCanvasElement) => {
 
   // const uniformElapsedTime = getUniformLocation(shaderProgram, "elapsedTime");
   const uniformEyeOriginPoint = getUniformLocation(shaderProgram, "eyeOriginPoint");
+  const uniformEyeRotationMatrix = getUniformLocation(shaderProgram, "eyeRotationMatrix");
 
   const startTime = Date.now();
   let lastTime = Date.now();
   const keyDown = {};
   let eyeOriginPoint = [0, 0, 5];
+  let eyeRotationMatrix = [
+    1, 0, 0,
+    0, 1, 0,
+    0, 0, 1,
+  ];
 
   document.addEventListener("keydown", (event) => {
     keyDown[event.code] = true;
@@ -190,6 +196,7 @@ const initGame = (canvas: HTMLCanvasElement) => {
     }
 
     gl.uniform3fv(uniformEyeOriginPoint, new Float32Array(eyeOriginPoint));
+    gl.uniformMatrix3fv(uniformEyeRotationMatrix, false, new Float32Array(eyeRotationMatrix));
 
     gl.bindBuffer(gl.ARRAY_BUFFER, quad.bufferVertices);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, quad.bufferIndices);
