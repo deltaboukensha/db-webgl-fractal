@@ -30,6 +30,7 @@ struct Circle {
 struct Sphere {
   vec3 originPoint;
   float radius;
+  vec3 color;
 };
 
 struct Sun {
@@ -144,7 +145,7 @@ vec3 findColor(Ray ray, Intersection intersection, Sphere sphere, Sun sun) {
   // specular
 
   // Lambertian shading
-  vec3 lambertian = 1.0f * vec3(1, 0, 0) * max(0.0f, dot(N, L));
+  vec3 lambertian = 1.0f * sphere.color * max(0.0f, dot(N, L));
   return lambertian;
 }
 
@@ -179,9 +180,9 @@ void main() {
   Ray eyeRay = Ray(eyeOriginPoint, normalize(vec3(st.s, st.t, focalLength)) * eyeRotationMatrix);
   World world;
   world.circle = Circle(vec3(0, 0, 10), vec3(0, 0, 1), 10.0f);
-  world.sphere[0] = Sphere(vec3(0, 0, 10), 1.0f);
-  world.sphere[1] = Sphere(vec3(+0.1, 0, 12), 1.0f);
-  world.sphere[2] = Sphere(vec3(-0.1, 0, 14), 1.0f);
+  world.sphere[0] = Sphere(vec3(0, 0, 10), 1.0f, vec3(1, 0, 0));
+  world.sphere[1] = Sphere(vec3(+1, 0, 12), 1.0f, vec3(0, 1, 0));
+  world.sphere[2] = Sphere(vec3(-1, 0, 14), 1.0f, vec3(0, 0, 1));
   world.sun = Sun(vec3(100, -100, 100));
   Job job = Job(eyeRay, world, -1);
   Result result = Result(false, job, COLOR_BLACK);
