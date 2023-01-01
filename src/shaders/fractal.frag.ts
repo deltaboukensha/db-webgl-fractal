@@ -121,13 +121,19 @@ Intersection findIntersection(Ray ray, Sphere sphere) {
 
   // simplified version only supports the case with exactly two solutions
 
-  if(delta > 0.0f) {
-    float d1 = -dot(u, o - c) - sqrt(delta);
-    // float d2 = -dot(u, o - c) + sqrt(delta);
-    return Intersection(true, o + d1 * u);
+  if(delta < 0.0f) {
+    return Intersection(false, vec3(0, 0, 0));
   }
 
-  return Intersection(false, vec3(0, 0, 0));
+  float d1 = -dot(u, o - c) - sqrt(delta);
+  float d2 = -dot(u, o - c) + sqrt(delta);
+  float d = max(d1,d2);
+
+  if(d < 0.01f){
+    return Intersection(false, vec3(0, 0, 0));
+  }
+
+  return Intersection(true, o + d * u);
 }
 
 vec4 findColor(Ray ray, Intersection intersection, Circle circle) {
@@ -146,7 +152,10 @@ vec3 findColor(Ray ray, Intersection intersection, Sphere sphere, Sun sun) {
 
   // Lambertian shading
   vec3 lambertian = 1.0f * sphere.color * max(0.0f, dot(N, L));
-  return lambertian;
+
+  // Fresnel effect
+  float fresnel = pow(1.0f - clamp(dot(N, V), 0.0f, 1.0f), 3.0f);
+  return lambertian * fresnel;
 }
 
 Result runJob(Job job){
@@ -188,7 +197,7 @@ void main() {
   Result result = Result(false, job, COLOR_BLACK);
   fragment = vec4(0, 0, 0, 1.0f);
 
-  for(int i=0; i<3; i++) {
+  for(int i=0; i<1; i++) {
     result = runJob(result.job);
     fragment = mix(fragment, vec4(result.color, 1.0f), 0.5f);
 
