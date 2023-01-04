@@ -7,8 +7,7 @@ uniform vec3 eyeOriginPoint;
 uniform mat3 eyeRotationMatrix;
 
 #define MATH_PI 3.1415926535897932384626433832795
-#define COLOR_BLACK vec3(0, 0, 0)
-#define COLOR_GREEN vec3(0, 1, 0)
+#define COLOR_BACKGROUND vec3(0, 0, 0)
 float focalLength = 1.0;
 
 struct Ray {
@@ -89,8 +88,8 @@ vec3 findColor(Ray ray, Intersection intersection, Sphere sphere, Sun sun) {
   vec3 lambertian = 1.0f * sphere.color * max(0.0f, dot(N, L));
 
   // Fresnel effect
-  float fresnel = pow(1.0f - clamp(dot(N, V), 0.0f, 1.0f), 3.0f);
-  return lambertian * fresnel;
+  float fresnel = pow(1.0f - clamp(dot(N, V), 0.0f, 1.0f), 2.0f);
+  return lambertian * fresnel * 8.0f;
 }
 
 Result runJob(Job job){
@@ -110,7 +109,7 @@ Result runJob(Job job){
     }
   }
   
-  return Result(true, job, COLOR_BLACK);
+  return Result(true, job, COLOR_BACKGROUND);
 }
 
 void main() {
@@ -121,17 +120,19 @@ void main() {
   world.sphere[2] = Sphere(vec3(-1, 0, 14), 1.0f, vec3(0, 0, 1));
   world.sun = Sun(vec3(100, -100, 100));
   Job job = Job(eyeRay, world, -1);
-  Result result = Result(false, job, COLOR_BLACK);
-  fragment = vec4(0, 0, 0, 1.0f);
+  Result result = Result(false, job, COLOR_BACKGROUND);
+  vec3 color = result.color;
 
-  for(int i=0; i<1; i++) {
+  for(int i=0; i<3; i++) {
     result = runJob(result.job);
-    fragment = mix(fragment, vec4(result.color, 1.0f), 0.5f);
+    color = color + result.color;
 
     if(result.done) {
-      return;
+      break;
     }
   }
+
+  fragment = vec4(color, 1.0f);
 }
 `;
 
