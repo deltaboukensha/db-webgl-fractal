@@ -7,7 +7,7 @@ uniform vec3 eyeOriginPoint;
 uniform mat3 eyeRotationMatrix;
 
 #define MATH_PI 3.1415926535897932384626433832795
-#define COLOR_BACKGROUND vec3(0, 0, 0)
+vec3 COLOR_BACKGROUND = vec3(0, 0, 0);
 float focalLength = 1.0;
 
 struct Ray {
@@ -41,7 +41,6 @@ struct World {
 struct Job {
   Ray eyeRay;
   World world;
-  int skipIndex;
 };
 
 struct Result {
@@ -94,18 +93,26 @@ vec3 findColor(Ray ray, Intersection intersection, Sphere sphere, Sun sun) {
 
 Result runJob(Job job){
   for(int i=0; i<job.world.sphere.length(); i++){
-    if(job.skipIndex == i) continue;
-
     Sphere sphere = job.world.sphere[i];
     Intersection intersection = findIntersection(job.eyeRay, sphere);
     if (intersection.hit) {
+
+      // color from sun to sphere reflection
       vec3 color = findColor(job.eyeRay, intersection, sphere, job.world.sun);
 
+      // color from refraction
       vec3 normalVector = normalize(intersection.point - sphere.originPoint);
-      vec3 refractionVector = refract(job.eyeRay.directionVector, normalVector, 1.1f);
-      Ray newRay = Ray(intersection.point, refractionVector);
-      Job newJob = Job(newRay, job.world, i);
-      return Result(false, newJob, color);
+      if(dot(job.eyeRay.directionVector, normalVector) < 0.0f){
+        vec3 refractionVector = refract(job.eyeRay.directionVector, normalVector, 1.0f/1.1f);
+        Ray newRay = Ray(intersection.point, refractionVector);
+        Job newJob = Job(newRay, job.world);
+        return Result(false, newJob, color);
+      } else {
+        vec3 refractionVector = refract(job.eyeRay.directionVector, -normalVector, 1.1f);
+        Ray newRay = Ray(intersection.point, refractionVector);
+        Job newJob = Job(newRay, job.world);
+        return Result(false, newJob, color);
+      }
     }
   }
   
@@ -119,7 +126,7 @@ void main() {
   world.sphere[1] = Sphere(vec3(+1, 0, 12), 1.0f, vec3(0, 1, 0));
   world.sphere[2] = Sphere(vec3(-1, 0, 14), 1.0f, vec3(0, 0, 1));
   world.sun = Sun(vec3(100, -100, 100));
-  Job job = Job(eyeRay, world, -1);
+  Job job = Job(eyeRay, world);
   Result result = Result(false, job, COLOR_BACKGROUND);
   vec3 color = result.color;
 
